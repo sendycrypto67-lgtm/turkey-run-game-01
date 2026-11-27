@@ -1,4 +1,4 @@
-// config.js — tuning numbers and colours for Gobble Dash, in one place.
+// config.js — tuning numbers and colours for Tom's Great Escape, in one place.
 export const CFG = {
   W: 1280, H: 720,
   groundY: 600,
@@ -38,7 +38,7 @@ export const CFG = {
       from: 1600, to: 2400,
       palette: 'kitchen',
       spawnGap: [360, 580],
-      kinds: ['oven', 'knife', 'pot', 'corn', 'corn', 'feather'],
+      kinds: ['oven', 'knife', 'knife', 'pot', 'corn', 'corn', 'feather'],
     },
   ],
   escapeAt: 2400, // metres: reach the forest gate and you are free
