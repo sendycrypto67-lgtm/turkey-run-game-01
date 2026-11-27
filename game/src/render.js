@@ -1,4 +1,4 @@
-// render.js — draws Gobble Dash on a 1280x720 canvas: autumn farm, barn and
+// render.js — draws Tom's Great Escape on a 1280x720 canvas: autumn farm, barn and
 // kitchen scenes, the turkey, the chasing farmer, the HUD and the screens.
 import { CFG } from './config.js';
 
@@ -46,6 +46,20 @@ function drawSky(ctx, world, pal) {
     ctx.ellipse(cx + 44, cy + 8, 48, 18, 0, 0, Math.PI * 2);
     ctx.fill();
   }
+  // birds drifting across the sky, high above the run
+  ctx.strokeStyle = 'rgba(60,50,40,0.7)';
+  ctx.lineWidth = 3;
+  ctx.lineCap = 'round';
+  for (let i = 0; i < 4; i += 1) {
+    const bx = ((i * 430 - world.scrollX * 0.1) % (CFG.W + 200) + CFG.W + 200) % (CFG.W + 200) - 100;
+    const by = 96 + i * 44 + Math.sin(world.time * 2 + i) * 6;
+    const flap = Math.sin(world.time * 6 + i * 2) * 5;
+    ctx.beginPath();
+    ctx.moveTo(bx - 12, by + flap);
+    ctx.quadraticCurveTo(bx, by - 6, bx, by);
+    ctx.quadraticCurveTo(bx, by - 6, bx + 12, by + flap);
+    ctx.stroke();
+  }
 }
 
 function drawHills(ctx, world, pal) {
@@ -88,21 +102,103 @@ function drawGround(ctx, world, pal) {
 
 function drawScenery(ctx, world, pal) {
   const stage = world.stage;
-  // distant props, one per ~900 px of world
-  for (let wx = Math.floor(world.scrollX / 900) * 900; wx < world.scrollX + CFG.W + 900; wx += 900) {
+  // distant props, one per ~750 px of world
+  for (let wx = Math.floor(world.scrollX / 750) * 750; wx < world.scrollX + CFG.W + 750; wx += 750) {
     const sx = wx - world.scrollX;
     if (stage === 0) drawFarmhouse(ctx, sx + 120, pal);
     if (stage === 1) drawBarn(ctx, sx + 120, pal);
     if (stage === 2) drawKitchenWindow(ctx, sx + 120, pal);
   }
+  // mid-ground: a low fence line and stage props at 0.7 parallax, small
+  // and muted so they read as background, never as obstacles
+  drawMidground(ctx, world, pal);
   // pumpkins and autumn trees in every stage
-  for (let i = 0; i < 6; i += 1) {
-    const wx = Math.floor((world.scrollX + i * 520) / 520) * 520 + 260;
+  for (let i = 0; i < 8; i += 1) {
+    const wx = Math.floor((world.scrollX + i * 420) / 420) * 420 + 210;
     const sx = wx - world.scrollX;
     if (sx < -80 || sx > CFG.W + 80) continue;
     if (i % 2 === 0) drawPumpkin(ctx, sx, pal);
     else drawAutumnTree(ctx, sx, pal);
   }
+  // low bushes between the trees, so the ground line never looks bare
+  ctx.fillStyle = pal.nearHill;
+  for (let i = 0; i < 8; i += 1) {
+    const wx = Math.floor((world.scrollX + i * 420 + 210) / 420) * 420 + 100;
+    const sx = wx - world.scrollX;
+    if (sx < -60 || sx > CFG.W + 60) continue;
+    ctx.beginPath();
+    ctx.arc(sx, CFG.groundY - 8, 26, Math.PI, 0);
+    ctx.arc(sx + 22, CFG.groundY - 6, 18, Math.PI, 0);
+    ctx.fill();
+  }
+}
+
+function drawMidground(ctx, world, pal) {
+  const off = (world.scrollX * 0.7) % 140;
+  ctx.save();
+  ctx.globalAlpha = 0.55;
+  ctx.fillStyle = pal.fence;
+  for (let x = -off; x < CFG.W + 140; x += 140) {
+    ctx.fillRect(x, CFG.groundY - 46, 5, 46);
+  }
+  ctx.fillRect(0, CFG.groundY - 40, CFG.W, 4);
+  ctx.fillRect(0, CFG.groundY - 24, CFG.W, 4);
+  // one stage prop per ~640 px of mid-ground
+  for (let wx = Math.floor((world.scrollX * 0.7) / 640) * 640; wx < world.scrollX * 0.7 + CFG.W + 640; wx += 640) {
+    const sx = wx - world.scrollX * 0.7;
+    if (world.stage === 0) drawCornStalk(ctx, sx + 90);
+    else if (world.stage === 1) drawBarrel(ctx, sx + 90);
+    else drawTable(ctx, sx + 60);
+  }
+  ctx.restore();
+}
+
+function drawCornStalk(ctx, x) {
+  ctx.fillStyle = '#5a7a2a';
+  ctx.fillRect(x - 3, CFG.groundY - 120, 6, 120);
+  ctx.beginPath();
+  ctx.moveTo(x, CFG.groundY - 110);
+  ctx.quadraticCurveTo(x - 34, CFG.groundY - 96, x - 44, CFG.groundY - 66);
+  ctx.quadraticCurveTo(x - 20, CFG.groundY - 80, x, CFG.groundY - 88);
+  ctx.moveTo(x, CFG.groundY - 100);
+  ctx.quadraticCurveTo(x + 34, CFG.groundY - 86, x + 44, CFG.groundY - 56);
+  ctx.quadraticCurveTo(x + 20, CFG.groundY - 70, x, CFG.groundY - 78);
+  ctx.fill();
+  ctx.fillStyle = '#e8b64c';
+  ctx.beginPath();
+  ctx.ellipse(x + 8, CFG.groundY - 84, 8, 16, 0.3, 0, Math.PI * 2);
+  ctx.fill();
+}
+
+function drawBarrel(ctx, x) {
+  ctx.fillStyle = '#7a5222';
+  ctx.beginPath();
+  ctx.ellipse(x, CFG.groundY - 8, 26, 10, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillRect(x - 26, CFG.groundY - 52, 52, 46);
+  ctx.beginPath();
+  ctx.ellipse(x, CFG.groundY - 52, 26, 10, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = '#5d3d22';
+  ctx.fillRect(x - 26, CFG.groundY - 44, 52, 4);
+  ctx.fillRect(x - 26, CFG.groundY - 20, 52, 4);
+}
+
+function drawTable(ctx, x) {
+  ctx.fillStyle = '#4a2f1e';
+  ctx.fillRect(x, CFG.groundY - 78, 150, 10);
+  ctx.fillRect(x + 10, CFG.groundY - 68, 8, 68);
+  ctx.fillRect(x + 132, CFG.groundY - 68, 8, 68);
+  // a candlestick and a plate on top
+  ctx.fillStyle = '#e8d8a0';
+  ctx.fillRect(x + 66, CFG.groundY - 100, 5, 22);
+  ctx.beginPath();
+  ctx.ellipse(x + 68, CFG.groundY - 102, 8, 4, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = '#d9d9e8';
+  ctx.beginPath();
+  ctx.ellipse(x + 108, CFG.groundY - 80, 16, 4, 0, 0, Math.PI * 2);
+  ctx.fill();
 }
 
 function drawFarmhouse(ctx, x, pal) {
@@ -268,10 +364,21 @@ function drawTurkey(ctx, world) {
 
 function drawFarmer(ctx, world) {
   const F = CFG.farmer;
-  const x = 60 + world.farmer * 1.9;
+  // He runs right behind the turkey and closes in as the meter rises:
+  // at 0 he trails 190 px back, at 100 he is on the turkey's tail.
+  const x = CFG.turkeyX - 190 + world.farmer * 1.6;
   const y = CFG.groundY;
-  const run = Math.sin(world.time * 14) * 8;
+  const run = Math.sin(world.time * 14) * (7 + world.farmer / 12);
   ctx.save();
+  // dust kicked up by the chase
+  ctx.fillStyle = 'rgba(210,180,140,0.5)';
+  for (let i = 0; i < 3; i += 1) {
+    const px = x - 24 - ((world.time * 90 + i * 26) % 70);
+    const py = y - 4 - ((i * 7) % 14);
+    ctx.beginPath();
+    ctx.arc(px, py, 5 + i * 2, 0, Math.PI * 2);
+    ctx.fill();
+  }
   // legs
   ctx.strokeStyle = F.boot;
   ctx.lineWidth = 7;
@@ -292,6 +399,20 @@ function drawFarmer(ctx, world) {
   ctx.ellipse(x - 18, y - 76, 8, 16, 0.5, 0, Math.PI * 2);
   ctx.ellipse(x + 20, y - 76, 8, 16, -0.5, 0, Math.PI * 2);
   ctx.fill();
+  // when he is close he reaches for the turkey
+  if (world.farmer > 60) {
+    ctx.strokeStyle = F.shirt;
+    ctx.lineWidth = 9;
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(x + 14, y - 78);
+    ctx.lineTo(x + 44, y - 66);
+    ctx.stroke();
+    ctx.fillStyle = F.skin;
+    ctx.beginPath();
+    ctx.arc(x + 48, y - 65, 7, 0, Math.PI * 2);
+    ctx.fill();
+  }
   // head
   ctx.fillStyle = F.skin;
   ctx.beginPath();
@@ -335,15 +456,15 @@ function drawFarmer(ctx, world) {
   ctx.lineTo(x + 42, y - 146);
   ctx.stroke();
   ctx.restore();
-  // shout bubble when close
+  // shout bubble when close, kept high so it never covers the end screen
   if (world.farmer > 55) {
     ctx.fillStyle = '#fff3d6';
-    roundRect(ctx, x - 10, y - 190, 150, 40, 10);
+    roundRect(ctx, x - 10, y - 214, 150, 40, 10);
     ctx.fill();
     ctx.fillStyle = '#3a2a1a';
     ctx.font = 'bold 20px sans-serif';
     ctx.textAlign = 'left';
-    ctx.fillText('COME BACK HERE!', x + 2, y - 164);
+    ctx.fillText('COME BACK HERE!', x + 2, y - 188);
   }
 }
 
@@ -486,16 +607,28 @@ function drawEntity(ctx, world, e) {
       break;
     }
     case 'knife': {
-      if (e.warnT > 0) {
-        // telegraph: flashing marker on the ground
+      if (e.warnT > 0 || e.yOff < 420) {
+        // telegraph: flashing marker on the ground, kept while the knife
+        // falls so the danger stays readable in play and in screenshots
         ctx.fillStyle = Math.floor(world.time * 10) % 2 === 0 ? 'rgba(255,60,40,0.75)' : 'rgba(255,60,40,0.3)';
         ctx.beginPath();
         ctx.ellipse(sx + 13, gy - 4, 34, 8, 0, 0, Math.PI * 2);
         ctx.fill();
         ctx.fillStyle = '#ff5a4e';
-        ctx.font = 'bold 22px sans-serif';
+        ctx.font = 'bold 26px sans-serif';
         ctx.textAlign = 'center';
         ctx.fillText('!', sx + 13, gy - 120);
+        if (e.warnT <= 0) {
+          // dashed guide from the falling blade down to its target
+          ctx.strokeStyle = 'rgba(255,90,78,0.8)';
+          ctx.lineWidth = 3;
+          ctx.setLineDash([8, 8]);
+          ctx.beginPath();
+          ctx.moveTo(sx + 13, e.yOff + 95);
+          ctx.lineTo(sx + 13, gy - 14);
+          ctx.stroke();
+          ctx.setLineDash([]);
+        }
       }
       const ky = e.yOff;
       ctx.save();
@@ -629,15 +762,15 @@ function drawTitle(ctx, world, best) {
   ctx.fillStyle = '#fff3d6';
   ctx.font = 'bold 84px sans-serif';
   ctx.textAlign = 'center';
-  ctx.fillText('GOBBLE DASH', CFG.W / 2, 190);
+  ctx.fillText("TOM'S GREAT ESCAPE", CFG.W / 2, 190);
   ctx.fillStyle = CFG.hudAmber;
   ctx.font = 'bold 30px sans-serif';
-  ctx.fillText('The Great Thanksgiving Escape', CFG.W / 2, 238);
+  ctx.fillText('A Thanksgiving turkey run', CFG.W / 2, 238);
   ctx.fillStyle = '#fff3d6';
   ctx.font = '22px sans-serif';
-  ctx.fillText('Thanksgiving is coming. The farmer has the oven on, the carving knife', CFG.W / 2, 300);
-  ctx.fillText('is out, and you are the main course. Run 2,400 metres to the forest', CFG.W / 2, 330);
-  ctx.fillText('and you are free. Stumble three times and dinner is served.', CFG.W / 2, 360);
+  ctx.fillText('Thanksgiving is coming. Tom the turkey is on the menu: the farmer', CFG.W / 2, 300);
+  ctx.fillText('has the oven on and the carving knife out. Run 2,400 metres to the', CFG.W / 2, 330);
+  ctx.fillText('forest and you are free. Stumble three times and dinner is served.', CFG.W / 2, 360);
   ctx.fillStyle = CFG.hudPanel;
   roundRect(ctx, (CFG.W - 620) / 2, 400, 620, 150, 14);
   ctx.fill();
@@ -678,7 +811,7 @@ function drawOver(ctx, world, best) {
   ctx.fillText(`Best score: ${Math.max(best, Math.floor(world.score))}`, CFG.W / 2, 366);
   ctx.fillStyle = CFG.hudGreen;
   ctx.font = 'bold 28px sans-serif';
-  ctx.fillText('Press R or click to run again', CFG.W / 2, 440);
+  ctx.fillText('Press R or click to run again', CFG.W / 2, 500);
 }
 
 export function drawWorld(ctx, world, screen, best) {
