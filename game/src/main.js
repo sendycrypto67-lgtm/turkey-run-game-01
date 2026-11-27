@@ -1,4 +1,4 @@
-// main.js — the loop for Gobble Dash: title, play, caught or escaped.
+// main.js — the loop for Tom's Great Escape: title, play, caught or escaped.
 // Reads ?shot=start|play|kitchen|end to stage a screenshot instead of playing.
 import { CFG } from './config.js';
 import { createWorld, resetWorld, stepWorld, EVENT_CORN, EVENT_FEATHER, EVENT_HIT, EVENT_OVER, EVENT_WIN, EVENT_JUMP, EVENT_DASH, EVENT_STAGE } from './world.js';
