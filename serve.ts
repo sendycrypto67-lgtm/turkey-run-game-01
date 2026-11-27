@@ -43,4 +43,4 @@ createServer((request, response) => {
   if (!stat.isFile()) { response.writeHead(404); response.end('not found'); return; }
   response.writeHead(200, { 'content-type': MIME[extname(file)] ?? 'application/octet-stream' });
   createReadStream(file).pipe(response);
-}).listen(port, () => console.log(`Gobble Dash on http://localhost:${port}/`));
+}).listen(port, () => console.log(`Tom's Great Escape on http://localhost:${port}/`));
