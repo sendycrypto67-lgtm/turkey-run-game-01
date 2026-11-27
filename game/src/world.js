@@ -1,4 +1,4 @@
-// world.js — the rules of Gobble Dash: running, jumping, the farmer's chase,
+// world.js — the rules of Tom's Great Escape: running, jumping, the farmer's chase,
 // obstacles, corn, stages and the escape. Pure stepping, no drawing, no sound.
 import { CFG } from './config.js';
 import { makeRng, pick, range } from './random.js';
@@ -78,7 +78,7 @@ export function resetWorld(world, seed = 1) {
 function spawnEntity(world, kind, x) {
   const size = obstacleSize(kind);
   const e = { kind, x, w: size.w, h: size.h, yOff: size.y, passed: false, active: true, vy: 0, warnT: 0, bob: world.rng() * 6.28 };
-  if (kind === 'knife') { e.yOff = -140; e.warnT = 0.7; e.vy = 0; }
+  if (kind === 'knife') { e.yOff = -140; e.warnT = 1.3; e.vy = 0; } // long warning: the knife must still be on screen when it starts falling, or the player never sees the drop
   if (kind === 'corn') e.yOff = world.rng() < 0.5 ? 0 : 150; // ground corn or jump corn
   if (kind === 'feather') e.yOff = 170;
   world.entities.push(e);
