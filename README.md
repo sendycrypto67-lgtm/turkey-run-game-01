@@ -1,13 +1,13 @@
-# Gobble Dash — The Great Thanksgiving Escape
+# Tom's Great Escape — A Thanksgiving Turkey Run
 
 [![make.fun bounty](https://make.fun/badge/turkey-run-game-01.svg)](https://make.fun/bounty/turkey-run-game-01)
 [![rank](https://make.fun/badge/turkey-run-game-01/sendycrypto67-lgtm/turkey-run-game-01/rank.svg)](https://make.fun/bounty/turkey-run-game-01)
 [![reward](https://make.fun/badge/turkey-run-game-01/sendycrypto67-lgtm/turkey-run-game-01/reward.svg)](https://make.fun/bounty/turkey-run-game-01)
 
 Thanksgiving is coming. The farmer has the oven on, the carving knife is out,
-and you are the main course. **Gobble Dash** is a side-scrolling turkey escape
-game: run 2,400 metres from the farmyard, through the barn and across the
-kitchen to the forest gate, and you are free. Stumble three times and dinner
+and Tom the turkey is the main course. **Tom's Great Escape** is a side-scrolling
+turkey escape game: run 2,400 metres from the farmyard, through the barn and across
+the kitchen to the forest gate, and you are free. Stumble three times and dinner
 is served.
 
 ## How to play
