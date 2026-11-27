@@ -108,6 +108,44 @@ function runFor(world, seconds, horizon, wantOver) {
   return world.over;
 }
 
+/** A frame worth screenshotting in the kitchen: a knife falling mid-air
+ * with its warning marker on the right half of the screen, with an oven
+ * or a pot in view beside it. With the 1.3 s warning the knife starts
+ * falling once it has scrolled on screen, so it is visible while yOff
+ * is 200-500 and the screen x is 600-1260. */
+function knifeFrame(world) {
+  let propSeen = false;
+  let knifeSeen = false;
+  for (const e of world.entities) {
+    if (!e.active) continue;
+    const sx = e.x - world.scrollX;
+    if ((e.kind === 'oven' || e.kind === 'pot') && sx > 400 && sx < 1150) propSeen = true;
+    if (e.kind === 'knife' && e.warnT <= 0 && e.yOff >= 200 && e.yOff <= 500 && sx >= 600 && sx <= 1260) knifeSeen = true;
+  }
+  return propSeen && knifeSeen;
+}
+
+/** Drive the autopilot until the run ends or `maxSeconds` pass. Test hook
+ * for the full-run win check; the browser never calls it. */
+export function runAutopilot(world, maxSeconds = 120) {
+  const state = { prevAction: 'none', lastJumpStep: -100, djumpArmed: false };
+  const steps = Math.floor(maxSeconds * 60);
+  for (let i = 0; i < steps; i += 1) {
+    const events = pilotStep(world, state, i);
+    if ((events & EVENT_OVER) !== 0) break;
+  }
+  return { over: world.over, won: world.won, distance: world.distance, score: world.score, lives: world.lives };
+}
+
+/** One autopilot step, exposed for measurement scripts. */
+export function createPilotState() {
+  return { prevAction: 'none', lastJumpStep: -100, djumpArmed: false };
+}
+
+export function autopilotStep(world, state, i) {
+  return pilotStep(world, state, i);
+}
+
 /**
  * Set `world` to the named scene and return the screen to draw and the best
  * score to show. Names: start, play, kitchen, end (anything else is start).
@@ -125,14 +163,19 @@ export function stageShot(name, world) {
     return { screen: world.over ? SCREEN_OVER : SCREEN_PLAY, best: world.score };
   }
   if (name === 'kitchen') {
-    // Run into the kitchen and stop mid-stage, while the ovens and knives
-    // are flying: the autopilot is good enough to win the whole run, so a
-    // plain time limit would show the escape screen instead of the kitchen.
+    // Run into the kitchen and stop on a frame where a carving knife is
+    // falling mid-air with its red warning marker, beside an oven or a
+    // pot: the brief asks for the knife to be dodged, so the screenshot
+    // must show one. The autopilot is good enough to win the whole run,
+    // so a plain time limit would show the escape screen instead.
     const state = { prevAction: 'none', lastJumpStep: -100, djumpArmed: false };
     const steps = Math.floor(300 * 60);
     for (let i = 0; i < steps; i += 1) {
       const events = pilotStep(world, state, i);
-      if ((events & EVENT_OVER) !== 0 || world.distance >= 1850) break;
+      if ((events & EVENT_OVER) !== 0) break;
+      if (world.distance >= 2350) break;
+      // wait out the stage banner (2.4 s) before taking the frame
+      if (world.stage === 2 && world.messageT <= 0 && knifeFrame(world)) break;
     }
     return { screen: world.over ? SCREEN_OVER : SCREEN_PLAY, best: world.score };
   }
