@@ -1,4 +1,4 @@
-// main.ts — the hand-in program for Gobble Dash.
+// main.ts — the hand-in program for Tom's Great Escape.
 // Copies game/ and screenshots/ from beside this file to /output and
 // writes /output/dossier.json with buildDossier from vendor/makefun-game.ts.
 // Node 22 standard library only. Run it as:
